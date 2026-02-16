@@ -122,3 +122,196 @@
             </div>
         </div>
     </div>
+        <script>
+        let currentColumn = 'todo';
+        let draggedTask = null;
+        let taskIdCounter = Date.now();
+        
+        // Загрузка задач из localStorage
+        function loadTasks() {
+            const saved = localStorage.getItem('kanban-tasks');
+            if (saved) {
+                try {
+                    const tasks = JSON.parse(saved);
+                    tasks.forEach(task => {
+                        if (task && task.id) {
+                            taskIdCounter = Math.max(taskIdCounter, parseInt(task.id.split('-')[1]) || 0);
+                            createTaskElement(task);
+                        }
+                    });
+                    updateCounts();
+                } catch(e) { console.error('Error loading tasks:', e); }
+            }
+        }
+        
+        // Сохранение задач
+        function saveTasks() {
+            const tasks = [];
+            document.querySelectorAll('.task').forEach(taskEl => {
+                tasks.push({
+                    id: taskEl.dataset.id,
+                    title: taskEl.querySelector('.task-title').textContent,
+                    priority: taskEl.dataset.priority,
+                    type: taskEl.dataset.type,
+                    desc: taskEl.dataset.desc || '',
+                    column: taskEl.closest('.column').dataset.column
+                });
+            });
+            localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
+        }
+        
+        function openModal(column) {
+            currentColumn = column;
+            document.getElementById('modal').classList.add('active');
+            document.getElementById('taskTitle').focus();
+        }
+        
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDesc').value = '';
+        }
+        
+        function addTask() {
+            const title = document.getElementById('taskTitle').value.trim();
+            if (!title) {
+                alert('Введите название задачи');
+                return;
+            }
+            
+            const task = {
+                id: 'task-' + (++taskIdCounter),
+                title: title,
+                priority: document.getElementById('taskPriority').value,
+                type: document.getElementById('taskType').value,
+                desc: document.getElementById('taskDesc').value.trim(),
+                column: currentColumn
+            };
+            
+            createTaskElement(task);
+            saveTasks();
+            updateCounts();
+            closeModal();
+        }
+        
+        function createTaskElement(task) {
+            const taskEl = document.createElement('div');
+            taskEl.className = 'task';
+            taskEl.draggable = true;
+            taskEl.dataset.id = task.id;
+            taskEl.dataset.priority = task.priority;
+            taskEl.dataset.type = task.type;
+            taskEl.dataset.desc = task.desc || '';
+            
+            const priorityClass = 'tag-' + task.priority;
+            const typeClasses = {
+                'automation': 'tag-automation',
+                'research': 'tag-research', 
+                'integration': 'tag-integration',
+                'content': 'tag-content',
+                'task': ''
+            };
+            const typeLabels = {
+                'automation': 'Автоматизация',
+                'research': 'Исследование',
+                'integration': 'Интеграция', 
+                'content': 'Контент',
+                'task': ''
+            };
+            const typeClass = typeClasses[task.type] || '';
+            const typeLabel = typeLabels[task.type] || '';
+            
+            taskEl.innerHTML = `<span class="delete-btn" onclick="deleteTask(this)">&times;</span>
+                <div class="task-title">${escapeHtml(task.title)}</div>
+                <div class="task-meta">
+                    <span class="tag ${priorityClass}">${getPriorityLabel(task.priority)}</span>
+                    ${typeLabel ? `<span class="tag ${typeClass}">${typeLabel}</span>` : ''}
+                </div>
+            `;
+            
+            // Drag events
+            taskEl.addEventListener('dragstart', (e) => {
+                draggedTask = taskEl;
+                taskEl.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            
+            taskEl.addEventListener('dragend', () => {
+                draggedTask = null;
+                taskEl.classList.remove('dragging');
+                document.querySelectorAll('.column').forEach(col => {
+                    col.classList.remove('drag-over');
+                });
+                saveTasks();
+                updateCounts();
+            });
+            
+            const column = document.querySelector(`[data-column="${task.column}"]`);
+            if (column) {
+                column.querySelector('.tasks').appendChild(taskEl);
+            }
+        }
+        
+        function deleteTask(btn) {
+            if (confirm('Удалить задачу?')) {
+                btn.closest('.task').remove();
+                saveTasks();
+                updateCounts();
+            }
+        }
+        
+        function updateCounts() {
+            document.querySelectorAll('.column').forEach(column => {
+                const count = column.querySelectorAll('.task').length;
+                column.querySelector('.column-count').textContent = count;
+            });
+        }
+        
+        function getPriorityLabel(priority) {
+            const labels = { high: 'Высокий', medium: 'Средний', low: 'Низкий' };
+            return labels[priority] || priority;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Drop zones
+        document.querySelectorAll('.column').forEach(column => {
+            column.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                column.classList.add('drag-over');
+            });
+            
+            column.addEventListener('dragleave', () => {
+                column.classList.remove('drag-over');
+            });
+            
+            column.addEventListener('drop', (e) => {
+                e.preventDefault();
+                column.classList.remove('drag-over');
+                if (draggedTask) {
+                    column.querySelector('.tasks').appendChild(draggedTask);
+                    saveTasks();
+                    updateCounts();
+                }
+            });
+        });
+        
+        // Enter в модалке
+        document.getElementById('taskTitle').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTask();
+        });
+        
+        // Закрытие модалки по клику вне
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') closeModal();
+        });
+        
+        // Загрузка при старте
+        loadTasks();
+    </script>
+</body>
+</html>
