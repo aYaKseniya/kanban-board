@@ -39,7 +39,8 @@
         .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; }
         .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
         .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-primary { background: #1976d2; color: #fff; }.btn-secondary { background: #e0e0e0; color: #333; }
+        .btn-primary { background: #1976d2; color: #fff; }
+        .btn-secondary { background: #e0e0e0; color: #333; }
         .delete-btn { float: right; color: #999; cursor: pointer; font-size: 18px; line-height: 1; padding: 0 4px; margin: -4px -4px 0 0; }
         .delete-btn:hover { color: #c62828; }
         .column-ideas { border-top: 4px solid #7c4dff; }
@@ -122,12 +123,20 @@
             </div>
         </div>
     </div>
-        <script>
+    <script>
         let currentColumn = 'todo';
         let draggedTask = null;
         let taskIdCounter = Date.now();
         
-        // Загрузка задач из localStorage
+        // Начальные задачи
+        const defaultTasks = [
+            { id: 'task-1', title: 'Создать канбан-доску в Telegram Mini App', priority: 'high', type: 'automation', desc: 'Интеграция с GitHub Pages', column: 'done' },
+            { id: 'task-2', title: 'Настроить обновление календаря Exchange', priority: 'high', type: 'integration', desc: 'Python скрипт для EWS', column: 'done' },
+            { id: 'task-3', title: 'Утренний дайджест календаря (cron)', priority: 'medium', type: 'automation', desc: 'Автоматическая отправка в Telegram', column: 'done' },
+            { id: 'task-4', title: 'Интеграция с Bitrix24 для задач', priority: 'medium', type: 'integration', desc: 'Получение списка задач из API', column: 'ideas' }
+        ];
+        
+        // Загрузка задач из localStorage или начальных
         function loadTasks() {
             const saved = localStorage.getItem('kanban-tasks');
             if (saved) {
@@ -139,9 +148,13 @@
                             createTaskElement(task);
                         }
                     });
-                    updateCounts();
                 } catch(e) { console.error('Error loading tasks:', e); }
+            } else {
+                // Первый запуск - загружаем начальные задачи
+                defaultTasks.forEach(task => createTaskElement(task));
+                saveTasks();
             }
+            updateCounts();
         }
         
         // Сохранение задач
@@ -221,7 +234,8 @@
             const typeClass = typeClasses[task.type] || '';
             const typeLabel = typeLabels[task.type] || '';
             
-            taskEl.innerHTML = `<span class="delete-btn" onclick="deleteTask(this)">&times;</span>
+            taskEl.innerHTML = `
+                <span class="delete-btn" onclick="deleteTask(this)">&times;</span>
                 <div class="task-title">${escapeHtml(task.title)}</div>
                 <div class="task-meta">
                     <span class="tag ${priorityClass}">${getPriorityLabel(task.priority)}</span>
