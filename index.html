@@ -9,21 +9,17 @@
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 20px; min-height: 100vh; }
         h1 { text-align: center; margin-bottom: 30px; color: #333; font-size: 24px; }
         .board { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 20px; }
-        .column { background: #ebecf0; border-radius: 12px; width: 300px; min-width: 300px; padding: 15px; display: flex; flex-direction: column; max-height: calc(100vh - 150px); }
+        .column { background: #ebecf0; border-radius: 12px; width: 280px; min-width: 280px; padding: 15px; display: flex; flex-direction: column; max-height: calc(100vh - 150px); }
         .column-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #ddd; }
         .column-title { font-weight: 600; font-size: 14px; color: #333; }
         .column-count { background: #fff; padding: 2px 8px; border-radius: 12px; font-size: 12px; color: #666; }
         .tasks { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; min-height: 100px; }
-        .task { background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: grab; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
+        .task { background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: grab; transition: transform 0.2s, box-shadow 0.2s; }
         .task:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
         .task.dragging { opacity: 0.5; cursor: grabbing; }
         .task-title { font-size: 14px; color: #333; margin-bottom: 8px; line-height: 1.4; word-wrap: break-word; }
-        .task-dates { font-size: 11px; color: #888; margin-bottom: 6px; }
-        .task-dates .created { color: #666; }
-        .task-dates .completed { color: #388e3c; font-weight: 500; }
-        .task-history-btn { font-size: 10px; color: #1976d2; cursor: pointer; text-decoration: underline; margin-top: 4px; display: inline-block; }
-        .task-history-btn:hover { color: #0d47a1; }
-        .task-meta { display: flex; gap: 6px; flex-wrap: wrap; }
+        .task-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+        .task-dates { font-size: 10px; color: #999; margin-top: 6px; border-top: 1px solid #eee; padding-top: 6px; }
         .tag { font-size: 10px; padding: 3px 8px; border-radius: 12px; font-weight: 500; }
         .tag-high { background: #ffebee; color: #c62828; }
         .tag-medium { background: #fff3e0; color: #ef6c00; }
@@ -37,7 +33,7 @@
         .column.drag-over { background: #d4edda; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
         .modal.active { display: flex; }
-        .modal-content { background: #fff; padding: 25px; border-radius: 12px; width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
         .modal-title { font-size: 18px; margin-bottom: 15px; color: #333; }
         .modal input, .modal select, .modal textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; }
         .modal textarea { min-height: 80px; resize: vertical; }
@@ -46,28 +42,29 @@
         .btn:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn-primary { background: #1976d2; color: #fff; }
         .btn-secondary { background: #e0e0e0; color: #333; }
-        .delete-btn { position: absolute; top: 8px; right: 8px; color: #999; cursor: pointer; font-size: 18px; line-height: 1; padding: 0 4px; }
+        .delete-btn { float: right; color: #999; cursor: pointer; font-size: 18px; line-height: 1; padding: 0 4px; margin: -4px -4px 0 0; }
         .delete-btn:hover { color: #c62828; }
+        .history-btn { font-size: 10px; color: #1976d2; cursor: pointer; margin-top: 4px; }
+        .history-btn:hover { text-decoration: underline; }
         .column-ideas { border-top: 4px solid #7c4dff; }
         .column-todo { border-top: 4px solid #9e9e9e; }
         .column-progress { border-top: 4px solid #1976d2; }
         .column-review { border-top: 4px solid #f57c00; }
         .column-done { border-top: 4px solid #388e3c; }
-        .history-modal .history-item { padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
-        .history-modal .history-item:last-child { border-bottom: none; }
-        .history-modal .history-date { color: #888; font-size: 11px; }
-        .history-modal .history-from-to { color: #333; }
-        .history-modal .history-reason { color: #666; font-style: italic; margin-top: 4px; }
-        .move-reason { font-size: 12px; color: #555; margin-top: 8px; padding: 8px; background: #f5f5f5; border-radius: 6px; border-left: 3px solid #1976d2; }
+        .sync-status { position: fixed; top: 10px; right: 10px; padding: 8px 12px; border-radius: 20px; font-size: 12px; }
+        .sync-status.syncing { background: #fff3e0; color: #ef6c00; }
+        .sync-status.synced { background: #e8f5e9; color: #2e7d32; }
+        .sync-status.error { background: #ffebee; color: #c62828; }
         @media (max-width: 768px) {
             body { padding: 10px; }
             h1 { font-size: 20px; margin-bottom: 20px; }
-            .column { width: 280px; min-width: 280px; padding: 12px; }
+            .column { width: 260px; min-width: 260px; padding: 12px; }
             .board { gap: 10px; }
         }
     </style>
 </head>
 <body>
+    <div class="sync-status" id="syncStatus">⏳ Загрузка...</div>
     <h1>📋 Канбан: Ксения & Клау</h1>
     <div class="board">
         <div class="column column-ideas" data-column="ideas">
@@ -111,8 +108,8 @@
             <button class="add-task" onclick="openModal('done')">+ Добавить</button>
         </div>
     </div>
-
-    <!-- Модальное окно для создания задачи -->
+    
+    <!-- Модальное окно для новой задачи -->
     <div class="modal" id="modal">
         <div class="modal-content">
             <h3 class="modal-title">Новая задача</h3>
@@ -137,306 +134,194 @@
         </div>
     </div>
 
-    <!-- Модальное окно для указания причины перемещения -->
+    <!-- Модальное окно для причины переноса -->
     <div class="modal" id="moveModal">
         <div class="modal-content">
             <h3 class="modal-title">Перемещение задачи</h3>
-            <p style="margin-bottom: 12px; font-size: 14px; color: #666;">
-                Перемещение из: <strong id="moveFrom">-</strong> → <strong id="moveTo">-</strong>
-            </p>
-            <textarea id="moveReason" placeholder="Укажите причину перемещения (необязательно)" style="min-height: 60px;"></textarea>
+            <p id="moveTaskTitle" style="margin-bottom: 12px; font-weight: 500;"></p>
+            <p style="margin-bottom: 12px; color: #666;">Из: <span id="moveFromCol"></span> → В: <span id="moveToCol"></span></p>
+            <textarea id="moveReason" placeholder="Причина перемещения (необязательно)" style="min-height: 60px;"></textarea>
             <div class="modal-buttons">
-                <button class="btn btn-secondary" onclick="cancelMove()">Отмена</button>
+                <button class="btn btn-secondary" onclick="closeMoveModal()">Отмена</button>
                 <button class="btn btn-primary" onclick="confirmMove()">Переместить</button>
             </div>
         </div>
     </div>
 
-    <!-- Модальное окно для просмотра истории -->
-    <div class="modal history-modal" id="historyModal">
-        <div class="modal-content">
-            <h3 class="modal-title">📜 История перемещений</h3>
-            <div id="historyContent" style="max-height: 300px; overflow-y: auto;"></div>
-            <div class="modal-buttons">
-                <button class="btn btn-secondary" onclick="closeHistoryModal()">Закрыть</button>
-            </div>
-        </div>
-    </div>
-
     <script>
+        // GitHub API конфигурация
+        // Токен нужно вставить здесь перед использованием
+        const GITHUB_TOKEN = localStorage.getItem('github_token') || prompt('Введите GitHub токен для синхронизации:');
+        if (GITHUB_TOKEN) localStorage.setItem('github_token', GITHUB_TOKEN);
+        const REPO_OWNER = 'aYaKseniya';
+        const REPO_NAME = 'kanban-board';
+        
         let currentColumn = 'todo';
         let draggedTask = null;
-        let taskIdCounter = Date.now();
         let pendingMove = null;
+        let tasks = [];
         
-        // Начальные задачи с датами создания и историей
-        const defaultTasks = [
-            { 
-                id: 'task-1', 
-                title: 'Создать канбан-доску в Telegram Mini App', 
-                priority: 'high', 
-                type: 'automation', 
-                desc: 'Интеграция с GitHub Pages', 
-                column: 'done',
-                createdAt: '2025-02-10T10:00:00.000Z',
-                completedAt: '2025-02-12T15:30:00.000Z',
-                history: [
-                    { from: 'ideas', to: 'todo', date: '2025-02-10T10:05:00.000Z', reason: '' },
-                    { from: 'todo', to: 'progress', date: '2025-02-11T09:00:00.000Z', reason: 'Начало разработки' },
-                    { from: 'progress', to: 'done', date: '2025-02-12T15:30:00.000Z', reason: 'Готово и протестировано' }
-                ]
-            },
-            { 
-                id: 'task-2', 
-                title: 'Настроить обновление календаря Exchange', 
-                priority: 'high', 
-                type: 'integration', 
-                desc: 'Python скрипт для EWS', 
-                column: 'done',
-                createdAt: '2025-02-08T14:00:00.000Z',
-                completedAt: '2025-02-11T16:00:00.000Z',
-                history: [
-                    { from: 'todo', to: 'progress', date: '2025-02-09T10:00:00.000Z', reason: '' },
-                    { from: 'progress', to: 'done', date: '2025-02-11T16:00:00.000Z', reason: 'Интеграция работает стабильно' }
-                ]
-            },
-            { 
-                id: 'task-3', 
-                title: 'Утренний дайджест календаря (cron)', 
-                priority: 'medium', 
-                type: 'automation', 
-                desc: 'Автоматическая отправка в Telegram', 
-                column: 'done',
-                createdAt: '2025-02-09T09:00:00.000Z',
-                completedAt: '2025-02-13T08:00:00.000Z',
-                history: [
-                    { from: 'todo', to: 'progress', date: '2025-02-10T11:00:00.000Z', reason: '' },
-                    { from: 'progress', to: 'review', date: '2025-02-12T17:00:00.000Z', reason: 'Требуется проверка работы cron' },
-                    { from: 'review', to: 'done', date: '2025-02-13T08:00:00.000Z', reason: 'Работает корректно' }
-                ]
-            },
-            { 
-                id: 'task-4', 
-                title: 'Интеграция с Bitrix24 для задач', 
-                priority: 'medium', 
-                type: 'integration', 
-                desc: 'Получение списка задач из API', 
-                column: 'ideas',
-                createdAt: '2025-02-14T11:00:00.000Z',
-                history: []
-            },
-            { 
-                id: 'task-5', 
-                title: 'Корректировка часового пояса в дайджесте', 
-                priority: 'high', 
-                type: 'automation', 
-                desc: 'Исправить отображение времени в утреннем дайджесте календаря', 
-                column: 'done',
-                createdAt: '2025-02-15T10:00:00.000Z',
-                completedAt: '2025-02-16T14:30:00.000Z',
-                history: [
-                    { from: 'todo', to: 'progress', date: '2025-02-15T11:00:00.000Z', reason: 'Обнаружена проблема с UTC' },
-                    { from: 'progress', to: 'done', date: '2025-02-16T14:30:00.000Z', reason: 'Часовой пояс исправлен на GMT+3' }
-                ]
-            },
-            { 
-                id: 'task-6', 
-                title: 'Самостоятельная постановка задач Клау', 
-                priority: 'medium', 
-                type: 'automation', 
-                desc: 'Реализовать возможность Клау самостоятельно добавлять задачи в канбан', 
-                column: 'done',
-                createdAt: '2025-02-14T16:00:00.000Z',
-                completedAt: '2025-02-17T05:00:00.000Z',
-                history: [
-                    { from: 'ideas', to: 'todo', date: '2025-02-15T09:00:00.000Z', reason: 'Приоритетная фича' },
-                    { from: 'todo', to: 'progress', date: '2025-02-16T10:00:00.000Z', reason: 'Начало реализации' },
-                    { from: 'progress', to: 'done', date: '2025-02-17T05:00:00.000Z', reason: 'Функционал реализован' }
-                ]
+        // Статус синхронизации
+        function setSyncStatus(status, text) {
+            const el = document.getElementById('syncStatus');
+            el.className = 'sync-status ' + status;
+            el.textContent = text;
+        }
+        
+        // Загрузка задач из GitHub Issues
+        async function loadTasks() {
+            setSyncStatus('syncing', '⏳ Синхронизация...');
+            try {
+                const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues?state=all&per_page=100`, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch issues');
+                
+                const issues = await response.json();
+                tasks = issues.map(issue => ({
+                    id: 'task-' + issue.number,
+                    title: issue.title,
+                    body: issue.body || '',
+                    column: getColumnFromLabels(issue.labels),
+                    priority: getPriorityFromBody(issue.body),
+                    type: getTypeFromBody(issue.body),
+                    created: issue.created_at.split('T')[0],
+                    completed: issue.closed_at ? issue.closed_at.split('T')[0] : null,
+                    number: issue.number,
+                    history: []
+                }));
+                
+                renderTasks();
+                setSyncStatus('synced', '✅ Синхронизировано');
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                setSyncStatus('error', '❌ Ошибка загрузки');
+                // Fallback к localStorage
+                loadFromLocalStorage();
             }
-        ];
+        }
         
-        const columnNames = {
-            'ideas': '💡 Идеи',
-            'todo': '📋 В плане',
-            'progress': '🔧 Клау делает',
-            'review': '👀 На проверке',
-            'done': '✅ Готово'
-        };
+        function getColumnFromLabels(labels) {
+            const columnLabels = ['ideas', 'todo', 'progress', 'review', 'done'];
+            for (const label of labels) {
+                if (columnLabels.includes(label.name)) return label.name;
+            }
+            return 'todo';
+        }
         
-        // Загрузка задач из localStorage или начальных
-        function loadTasks() {
+        function getPriorityFromBody(body) {
+            if (!body) return 'medium';
+            if (body.includes('Приоритет: high')) return 'high';
+            if (body.includes('Приоритет: low')) return 'low';
+            return 'medium';
+        }
+        
+        function getTypeFromBody(body) {
+            if (!body) return 'task';
+            const match = body.match(/Тип: (\w+)/);
+            return match ? match[1] : 'task';
+        }
+        
+        function loadFromLocalStorage() {
             const saved = localStorage.getItem('kanban-tasks');
             if (saved) {
-                try {
-                    const tasks = JSON.parse(saved);
-                    tasks.forEach(task => {
-                        if (task && task.id) {
-                            taskIdCounter = Math.max(taskIdCounter, parseInt(task.id.split('-')[1]) || 0);
-                            createTaskElement(task);
-                        }
-                    });
-                } catch(e) { console.error('Error loading tasks:', e); }
-            } else {
-                // Первый запуск - загружаем начальные задачи
-                defaultTasks.forEach(task => createTaskElement(task));
-                saveTasks();
-            }
-            updateCounts();
-        }
-        
-        // Сохранение задач
-        function saveTasks() {
-            const tasks = [];
-            document.querySelectorAll('.task').forEach(taskEl => {
-                const task = {
-                    id: taskEl.dataset.id,
-                    title: taskEl.querySelector('.task-title').textContent,
-                    priority: taskEl.dataset.priority,
-                    type: taskEl.dataset.type,
-                    desc: taskEl.dataset.desc || '',
-                    column: taskEl.closest('.column').dataset.column,
-                    createdAt: taskEl.dataset.createdAt,
-                    completedAt: taskEl.dataset.completedAt || null,
-                    history: JSON.parse(taskEl.dataset.history || '[]')
-                };
-                tasks.push(task);
-            });
-            localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
-        }
-        
-        function formatDate(dateStr) {
-            if (!dateStr) return '';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        }
-        
-        function formatDateTime(dateStr) {
-            if (!dateStr) return '';
-            const date = new Date(dateStr);
-            return date.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-        }
-        
-        function openModal(column) {
-            currentColumn = column;
-            document.getElementById('modal').classList.add('active');
-            document.getElementById('taskTitle').focus();
-        }
-        
-        function closeModal() {
-            document.getElementById('modal').classList.remove('active');
-            document.getElementById('taskTitle').value = '';
-            document.getElementById('taskDesc').value = '';
-        }
-        
-        function openMoveModal(from, to) {
-            pendingMove = { from, to };
-            document.getElementById('moveFrom').textContent = columnNames[from];
-            document.getElementById('moveTo').textContent = columnNames[to];
-            document.getElementById('moveReason').value = '';
-            document.getElementById('moveModal').classList.add('active');
-            document.getElementById('moveReason').focus();
-        }
-        
-        function cancelMove() {
-            pendingMove = null;
-            document.getElementById('moveModal').classList.remove('active');
-            // Возвращаем задачу на исходную позицию
-            if (draggedTask) {
-                const fromColumn = document.querySelector(`[data-column="${draggedTask.dataset.lastColumn}"]`);
-                if (fromColumn) {
-                    fromColumn.querySelector('.tasks').appendChild(draggedTask);
-                }
-                draggedTask = null;
+                tasks = JSON.parse(saved);
+                renderTasks();
             }
         }
         
-        function confirmMove() {
-            if (!pendingMove || !draggedTask) return;
+        // Создание задачи (GitHub Issue)
+        async function createTaskOnGitHub(task) {
+            setSyncStatus('syncing', '⏳ Создание...');
+            try {
+                const body = `**Описание:** ${task.desc || 'Нет описания'}
+
+**Приоритет:** ${task.priority}
+**Тип:** ${task.type}
+**Создано:** ${task.created}`;
+                
+                const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: task.title,
+                        body: body,
+                        labels: [task.column, task.priority, task.type]
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to create issue');
+                
+                const issue = await response.json();
+                setSyncStatus('synced', '✅ Создано');
+                return issue.number;
+            } catch (error) {
+                console.error('Error creating task:', error);
+                setSyncStatus('error', '❌ Ошибка создания');
+                return null;
+            }
+        }
+        
+        // Обновление задачи
+        async function updateTaskOnGitHub(taskNumber, updates) {
+            setSyncStatus('syncing', '⃣ Обновление...');
+            try {
+                const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${taskNumber}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updates)
+                });
+                
+                if (!response.ok) throw new Error('Failed to update issue');
+                
+                setSyncStatus('synced', '✅ Обновлено');
+                return true;
+            } catch (error) {
+                console.error('Error updating task:', error);
+                setSyncStatus('error', '❌ Ошибка обновления');
+                return false;
+            }
+        }
+        
+        // Добавление комментария (история)
+        async function addCommentToTask(taskNumber, comment) {
+            try {
+                await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${taskNumber}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ body: comment })
+                });
+            } catch (error) {
+                console.error('Error adding comment:', error);
+            }
+        }
+        
+        // Рендеринг задач
+        function renderTasks() {
+            document.querySelectorAll('.tasks').forEach(el => el.innerHTML = '');
             
-            const reason = document.getElementById('moveReason').value.trim();
-            const history = JSON.parse(draggedTask.dataset.history || '[]');
-            
-            history.push({
-                from: pendingMove.from,
-                to: pendingMove.to,
-                date: new Date().toISOString(),
-                reason: reason
+            tasks.forEach(task => {
+                createTaskElement(task);
             });
             
-            draggedTask.dataset.history = JSON.stringify(history);
-            
-            // Если перемещаем в done, устанавливаем дату выполнения
-            if (pendingMove.to === 'done' && !draggedTask.dataset.completedAt) {
-                draggedTask.dataset.completedAt = new Date().toISOString();
-            }
-            
-            // Если перемещаем из done, удаляем дату выполнения
-            if (pendingMove.to !== 'done') {
-                draggedTask.dataset.completedAt = '';
-            }
-            
-            // Обновляем отображение дат
-            updateTaskDates(draggedTask);
-            
-            // Показываем причину в задаче
-            updateMoveReason(draggedTask, reason);
-            
-            pendingMove = null;
-            document.getElementById('moveModal').classList.remove('active');
-            draggedTask = null;
-            saveTasks();
             updateCounts();
-        }
-        
-        function updateTaskDates(taskEl) {
-            const createdAt = taskEl.dataset.createdAt;
-            const completedAt = taskEl.dataset.completedAt;
-            const datesEl = taskEl.querySelector('.task-dates');
-            
-            let html = `<span class="created">📅 Создано: ${formatDate(createdAt)}</span>`;
-            if (completedAt) {
-                html += ` | <span class="completed">✅ Выполнено: ${formatDate(completedAt)}</span>`;
-            }
-            datesEl.innerHTML = html;
-        }
-        
-        function updateMoveReason(taskEl, reason) {
-            let reasonEl = taskEl.querySelector('.move-reason');
-            if (reason) {
-                if (!reasonEl) {
-                    reasonEl = document.createElement('div');
-                    reasonEl.className = 'move-reason';
-                    taskEl.appendChild(reasonEl);
-                }
-                reasonEl.textContent = `💬 ${reason}`;
-            } else if (reasonEl) {
-                reasonEl.remove();
-            }
-        }
-        
-        function addTask() {
-            const title = document.getElementById('taskTitle').value.trim();
-            if (!title) {
-                alert('Введите название задачи');
-                return;
-            }
-            
-            const task = {
-                id: 'task-' + (++taskIdCounter),
-                title: title,
-                priority: document.getElementById('taskPriority').value,
-                type: document.getElementById('taskType').value,
-                desc: document.getElementById('taskDesc').value.trim(),
-                column: currentColumn,
-                createdAt: new Date().toISOString(),
-                history: []
-            };
-            
-            createTaskElement(task);
-            saveTasks();
-            updateCounts();
-            closeModal();
+            saveToLocalStorage();
         }
         
         function createTaskElement(task) {
@@ -444,18 +329,12 @@
             taskEl.className = 'task';
             taskEl.draggable = true;
             taskEl.dataset.id = task.id;
-            taskEl.dataset.priority = task.priority;
-            taskEl.dataset.type = task.type;
-            taskEl.dataset.desc = task.desc || '';
-            taskEl.dataset.createdAt = task.createdAt || new Date().toISOString();
-            taskEl.dataset.completedAt = task.completedAt || '';
-            taskEl.dataset.history = JSON.stringify(task.history || []);
-            taskEl.dataset.lastColumn = task.column;
+            taskEl.dataset.number = task.number || '';
             
-            const priorityClass = 'tag-' + task.priority;
+            const priorityClass = 'tag-' + (task.priority || 'medium');
             const typeClasses = {
                 'automation': 'tag-automation',
-                'research': 'tag-research', 
+                'research': 'tag-research',
                 'integration': 'tag-integration',
                 'content': 'tag-content',
                 'task': ''
@@ -463,47 +342,31 @@
             const typeLabels = {
                 'automation': 'Автоматизация',
                 'research': 'Исследование',
-                'integration': 'Интеграция', 
+                'integration': 'Интеграция',
                 'content': 'Контент',
                 'task': ''
             };
             const typeClass = typeClasses[task.type] || '';
             const typeLabel = typeLabels[task.type] || '';
             
-            const createdAt = task.createdAt || new Date().toISOString();
-            const completedAt = task.completedAt;
-            
-            let datesHtml = `<span class="created">📅 Создано: ${formatDate(createdAt)}</span>`;
-            if (completedAt) {
-                datesHtml += ` | <span class="completed">✅ Выполнено: ${formatDate(completedAt)}</span>`;
-            }
-            
-            // Получаем последнюю причину перемещения
-            const history = task.history || [];
-            const lastMove = history[history.length - 1];
-            let reasonHtml = '';
-            if (lastMove && lastMove.reason) {
-                reasonHtml = `<div class="move-reason">💬 ${escapeHtml(lastMove.reason)}</div>`;
-            }
+            const completedDate = task.completed ? `<br>✅ Выполнено: ${task.completed}` : '';
             
             taskEl.innerHTML = `
-                <span class="delete-btn" onclick="deleteTask(this)">&times;</span>
+                <span class="delete-btn" onclick="deleteTask('${task.id}')">&times;</span>
                 <div class="task-title">${escapeHtml(task.title)}</div>
-                <div class="task-dates">${datesHtml}</div>
                 <div class="task-meta">
                     <span class="tag ${priorityClass}">${getPriorityLabel(task.priority)}</span>
                     ${typeLabel ? `<span class="tag ${typeClass}">${typeLabel}</span>` : ''}
                 </div>
-                ${history.length > 0 ? `<span class="task-history-btn" onclick="showHistory('${task.id}')">📜 История (${history.length})</span>` : ''}
-                ${reasonHtml}
+                <div class="task-dates">
+                    📅 Создано: ${task.created}${completedDate}
+                </div>
             `;
             
             // Drag events
             taskEl.addEventListener('dragstart', (e) => {
-                draggedTask = taskEl;
-                taskEl.dataset.lastColumn = taskEl.closest('.column').dataset.column;
+                draggedTask = task;
                 taskEl.classList.add('dragging');
-                e.dataTransfer.effectAllowed = 'move';
             });
             
             taskEl.addEventListener('dragend', () => {
@@ -519,38 +382,15 @@
             }
         }
         
-        function showHistory(taskId) {
-            const taskEl = document.querySelector(`[data-id="${taskId}"]`);
-            if (!taskEl) return;
-            
-            const history = JSON.parse(taskEl.dataset.history || '[]');
-            const content = document.getElementById('historyContent');
-            
-            if (history.length === 0) {
-                content.innerHTML = '<p style="color: #888; text-align: center;">История перемещений пуста</p>';
-            } else {
-                content.innerHTML = history.map(h => `
-                    <div class="history-item">
-                        <div class="history-from-to">${columnNames[h.from]} → ${columnNames[h.to]}</div>
-                        <div class="history-date">${formatDateTime(h.date)}</div>
-                        ${h.reason ? `<div class="history-reason">💬 ${escapeHtml(h.reason)}</div>` : ''}
-                    </div>
-                `).join('');
-            }
-            
-            document.getElementById('historyModal').classList.add('active');
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
         
-        function closeHistoryModal() {
-            document.getElementById('historyModal').classList.remove('active');
-        }
-        
-        function deleteTask(btn) {
-            if (confirm('Удалить задачу?')) {
-                btn.closest('.task').remove();
-                saveTasks();
-                updateCounts();
-            }
+        function getPriorityLabel(priority) {
+            const labels = { high: 'Высокий', medium: 'Средний', low: 'Низкий' };
+            return labels[priority] || priority;
         }
         
         function updateCounts() {
@@ -560,18 +400,54 @@
             });
         }
         
-        function getPriorityLabel(priority) {
-            const labels = { high: 'Высокий', medium: 'Средний', low: 'Низкий' };
-            return labels[priority] || priority;
+        function saveToLocalStorage() {
+            localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
         }
         
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        // Модальные окна
+        function openModal(column) {
+            currentColumn = column;
+            document.getElementById('modal').classList.add('active');
+            document.getElementById('taskTitle').focus();
         }
         
-        // Drop zones
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDesc').value = '';
+        }
+        
+        async function addTask() {
+            const title = document.getElementById('taskTitle').value.trim();
+            if (!title) {
+                alert('Введите название задачи');
+                return;
+            }
+            
+            const task = {
+                id: 'task-' + Date.now(),
+                title: title,
+                priority: document.getElementById('taskPriority').value,
+                type: document.getElementById('taskType').value,
+                desc: document.getElementById('taskDesc').value.trim(),
+                column: currentColumn,
+                created: new Date().toISOString().split('T')[0],
+                completed: currentColumn === 'done' ? new Date().toISOString().split('T')[0] : null,
+                history: []
+            };
+            
+            // Создаём на GitHub
+            const issueNumber = await createTaskOnGitHub(task);
+            if (issueNumber) {
+                task.number = issueNumber;
+            }
+            
+            tasks.push(task);
+            renderTasks();
+            closeModal();
+        }
+        
+        // Drag & Drop с запросом причины
         document.querySelectorAll('.column').forEach(column => {
             column.addEventListener('dragover', (e) => {
                 e.preventDefault();
@@ -585,31 +461,102 @@
             column.addEventListener('drop', (e) => {
                 e.preventDefault();
                 column.classList.remove('drag-over');
+                
                 if (draggedTask) {
-                    const fromColumn = draggedTask.dataset.lastColumn;
-                    const toColumn = column.dataset.column;
-                    
-                    if (fromColumn !== toColumn) {
-                        column.querySelector('.tasks').appendChild(draggedTask);
-                        openMoveModal(fromColumn, toColumn);
-                    } else {
-                        draggedTask = null;
+                    const newColumn = column.dataset.column;
+                    if (draggedTask.column !== newColumn) {
+                        // Открываем модалку для причины
+                        pendingMove = {
+                            task: draggedTask,
+                            from: draggedTask.column,
+                            to: newColumn
+                        };
+                        openMoveModal(draggedTask, draggedTask.column, newColumn);
                     }
                 }
             });
         });
         
-        // Enter в модалке
-        document.getElementById('taskTitle').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addTask();
-        });
+        function openMoveModal(task, from, to) {
+            const colNames = {
+                ideas: '💡 Идеи',
+                todo: '📋 В плане',
+                progress: '🔧 В работе',
+                review: '👀 На проверке',
+                done: '✅ Готово'
+            };
+            
+            document.getElementById('moveTaskTitle').textContent = task.title;
+            document.getElementById('moveFromCol').textContent = colNames[from];
+            document.getElementById('moveToCol').textContent = colNames[to];
+            document.getElementById('moveReason').value = '';
+            document.getElementById('moveModal').classList.add('active');
+        }
         
-        document.getElementById('moveReason').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                confirmMove();
+        function closeMoveModal() {
+            document.getElementById('moveModal').classList.remove('active');
+            pendingMove = null;
+        }
+        
+        async function confirmMove() {
+            if (!pendingMove) return;
+            
+            const reason = document.getElementById('moveReason').value.trim();
+            const { task, from, to } = pendingMove;
+            
+            // Обновляем задачу
+            task.column = to;
+            if (to === 'done' && !task.completed) {
+                task.completed = new Date().toISOString().split('T')[0];
             }
-        });
+            
+            // Добавляем в историю
+            const moveRecord = {
+                from: from,
+                to: to,
+                date: new Date().toISOString().split('T')[0],
+                reason: reason || 'Без причины'
+            };
+            task.history.push(moveRecord);
+            
+            // Обновляем на GitHub
+            if (task.number) {
+                const body = `**Описание:** ${task.desc || 'Нет описания'}
+
+**Приоритет:** ${task.priority}
+**Тип:** ${task.type}
+**Создано:** ${task.created}
+
+**История перемещений:**
+${task.history.map(h => `- ${h.date}: ${h.from} → ${h.to}${h.reason ? ' (' + h.reason + ')' : ''}`).join('\n')}`;
+                
+                await updateTaskOnGitHub(task.number, {
+                    labels: [to, task.priority, task.type],
+                    body: body,
+                    state: to === 'done' ? 'closed' : 'open'
+                });
+                
+                // Добавляем комментарий о перемещении
+                const comment = `📦 Перемещено: ${from} → ${to}\n📅 Дата: ${moveRecord.date}${reason ? '\n💬 Причина: ' + reason : ''}`;
+                await addCommentToTask(task.number, comment);
+            }
+            
+            renderTasks();
+            closeMoveModal();
+        }
+        
+        async function deleteTask(taskId) {
+            if (!confirm('Удалить задачу?')) return;
+            
+            const task = tasks.find(t => t.id === taskId);
+            if (task && task.number) {
+                // Закрываем issue на GitHub
+                await updateTaskOnGitHub(task.number, { state: 'closed' });
+            }
+            
+            tasks = tasks.filter(t => t.id !== taskId);
+            renderTasks();
+        }
         
         // Закрытие модалок по клику вне
         document.getElementById('modal').addEventListener('click', (e) => {
@@ -617,15 +564,19 @@
         });
         
         document.getElementById('moveModal').addEventListener('click', (e) => {
-            if (e.target.id === 'moveModal') cancelMove();
+            if (e.target.id === 'moveModal') closeMoveModal();
         });
         
-        document.getElementById('historyModal').addEventListener('click', (e) => {
-            if (e.target.id === 'historyModal') closeHistoryModal();
+        // Enter в полях
+        document.getElementById('taskTitle').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTask();
         });
         
         // Загрузка при старте
         loadTasks();
+        
+        // Автообновление каждые 30 секунд
+        setInterval(loadTasks, 30000);
     </script>
 </body>
 </html>
