@@ -101,7 +101,7 @@
             padding: 12px;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            cursor: grab;
+            cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
         
@@ -130,8 +130,8 @@
             font-weight: 500;
         }
         
-        .tag-github { background: #e1f5fe; color: #0277bd; }
-        .tag-issue { background: #f3e5f5; color: #7b1fa2; }
+        .tag-open { background: #e8f5e9; color: #2e7d32; }
+        .tag-closed { background: #e0e0e0; color: #616161; }
         
         .task-number {
             font-size: 12px;
@@ -140,16 +140,16 @@
         }
         
         /* Цвета колонок */
+        .column-ideas { border-top: 4px solid #7c4dff; }
         .column-todo { border-top: 4px solid #9e9e9e; }
         .column-progress { border-top: 4px solid #1976d2; }
         .column-review { border-top: 4px solid #f57c00; }
         .column-done { border-top: 4px solid #388e3c; }
-        .column-ideas { border-top: 4px solid #7c4dff; }
     </style>
 </head>
 <body>
     <h1>📋 Канбан: Ксения & Клау</h1>
-    <p class="subtitle">Задачи загружаются из GitHub Issues • Без localStorage</p>
+    <p class="subtitle">Все задачи из GitHub Issues • Без localStorage</p>
     
     <div id="loading" class="loading">Загрузка задач из GitHub...</div>
     <div id="error" class="error" style="display: none;"></div>
@@ -197,14 +197,13 @@
     </div>
 
     <script>
-        // Конфигурация
         const REPO_OWNER = 'aYaKseniya';
         const REPO_NAME = 'kanban-board';
         
-        // Загрузка задач из GitHub Issues
         async function loadTasksFromGitHub() {
             try {
-                const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues?state=all&labels=kanban`);
+                // Загружаем ВСЕ issues (без фильтра по лейблу)
+                const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues?state=all&per_page=100`);
                 
                 if (!response.ok) {
                     throw new Error(`GitHub API error: ${response.status}`);
@@ -212,13 +211,12 @@
                 
                 const issues = await response.json();
                 
-                // Скрываем загрузку, показываем доску
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('board').style.display = 'flex';
                 
-                // Распределяем задачи по колонкам
-                // Новые задачи (open) → Идеи
-                // Закрытые задачи (closed) → Готово
+                // Сортируем: сначала новые
+                issues.sort((a, b) => b.number - a.number);
+                
                 issues.forEach(issue => {
                     const task = {
                         id: issue.number,
@@ -228,7 +226,7 @@
                         created: issue.created_at
                     };
                     
-                    // Определяем колонку по статусу
+                    // Открытые → Идеи, Закрытые → Готово
                     let column = 'ideas';
                     if (issue.state === 'closed') {
                         column = 'done';
@@ -243,7 +241,7 @@
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('error').style.display = 'block';
                 document.getElementById('error').textContent = 
-                    `Ошибка загрузки: ${error.message}. Проверьте подключение к интернету.`;
+                    `Ошибка загрузки: ${error.message}`;
             }
         }
         
@@ -251,18 +249,17 @@
             const taskEl = document.createElement('div');
             taskEl.className = 'task';
             
-            const stateLabel = task.state === 'closed' ? '✅' : '📋';
+            const stateClass = task.state === 'closed' ? 'tag-closed' : 'tag-open';
+            const stateLabel = task.state === 'closed' ? '✅ Закрыто' : '📋 Открыто';
             
             taskEl.innerHTML = `
-                <div class="task-number">#${task.id} ${stateLabel}</div>
+                <div class="task-number">#${task.id}</div>
                 <div class="task-title">${escapeHtml(task.title)}</div>
                 <div class="task-meta">
-                    <span class="tag tag-github">GitHub</span>
-                    <span class="tag tag-issue">Issue</span>
+                    <span class="tag ${stateClass}">${stateLabel}</span>
                 </div>
             `;
             
-            // Клик по задаче открывает GitHub
             taskEl.addEventListener('click', () => {
                 window.open(task.url, '_blank');
             });
@@ -286,7 +283,6 @@
             return div.innerHTML;
         }
         
-        // Загрузка при старте
         loadTasksFromGitHub();
     </script>
 </body>
