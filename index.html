@@ -361,6 +361,18 @@ if (saved) {
         function saveTasks() {
             const tasks = [];
             document.querySelectorAll('.task').forEach(taskEl => {
+                const column = taskEl.closest('.column').dataset.column;
+                let closedAt = taskEl.dataset.closedAt || '';
+                
+                // Автоматически добавляем дату закрытия при перемещении в Done
+                if (column === 'done' && !closedAt) {
+                    closedAt = new Date().toISOString();
+                }
+                // Удаляем дату закрытия если вынесли из Done
+                if (column !== 'done') {
+                    closedAt = '';
+                }
+                
                 tasks.push({
                     id: taskEl.dataset.id,
                     title: taskEl.querySelector('.task-title').textContent,
@@ -368,9 +380,9 @@ if (saved) {
                     priority: taskEl.dataset.priority,
                     type: taskEl.dataset.type,
                     desc: taskEl.dataset.desc || '',
-                    column: taskEl.closest('.column').dataset.column,
+                    column: column,
                     createdAt: taskEl.dataset.createdAt || new Date().toISOString(),
-                    closedAt: taskEl.dataset.closedAt || ''
+                    closedAt: closedAt
                 });
             });
             localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
