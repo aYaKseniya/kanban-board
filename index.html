@@ -357,36 +357,39 @@ if (saved) {
             }
         }
 
-      
+     
         function saveTasks() {
-            const tasks = [];
-            document.querySelectorAll('.task').forEach(taskEl => {
-                const column = taskEl.closest('.column').dataset.column;
-                let closedAt = taskEl.dataset.closedAt || '';
-                
-                // Автоматически добавляем дату закрытия при перемещении в Done
-                if (column === 'done' && !closedAt) {
-                    closedAt = new Date().toISOString();
-                }
-                // Удаляем дату закрытия если вынесли из Done
-                if (column !== 'done') {
-                    closedAt = '';
-                }
-                
-                tasks.push({
-                    id: taskEl.dataset.id,
-                    title: taskEl.querySelector('.task-title').textContent,
-                    deadline: taskEl.dataset.deadline || '',
-                    priority: taskEl.dataset.priority,
-                    type: taskEl.dataset.type,
-                    desc: taskEl.dataset.desc || '',
-                    column: column,
-                    createdAt: taskEl.dataset.createdAt || new Date().toISOString(),
-                    closedAt: closedAt
-                });
-            });
-            localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
+    const tasks = [];
+    document.querySelectorAll('.task').forEach(taskEl => {
+        const column = taskEl.closest('.column').dataset.column;
+        let closedAt = taskEl.dataset.closedAt || '';
+        
+        // Автоматически добавляем дату закрытия при перемещении в Done
+        if (column === 'done' && !closedAt) {
+            closedAt = new Date().toISOString();
+            taskEl.dataset.closedAt = closedAt; // Сохраняем в DOM
         }
+        // Удаляем дату закрытия если вынесли из Done
+        if (column !== 'done' && closedAt) {
+            closedAt = '';
+            taskEl.dataset.closedAt = ''; // Очищаем в DOM
+        }
+        
+        tasks.push({
+            id: taskEl.dataset.id,
+            title: taskEl.querySelector('.task-title').textContent,
+            deadline: taskEl.dataset.deadline || '',
+            priority: taskEl.dataset.priority,
+            type: taskEl.dataset.type,
+            desc: taskEl.dataset.desc || '',
+            column: column,
+            createdAt: taskEl.dataset.createdAt || new Date().toISOString(),
+            closedAt: closedAt
+        });
+    });
+    localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
+}
+
         function createTaskElement(task) {
             const taskEl = document.createElement('div');
             taskEl.className = 'task';
