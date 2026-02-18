@@ -5,66 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Канбан-доска</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f5;
             padding: 20px;
             min-height: 100vh;
         }
-        
-        h1 {
-            text-align: center;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        
-        .error {
-            text-align: center;
-            padding: 20px;
-            color: #c62828;
-            background: #ffebee;
-            border-radius: 8px;
-            margin: 20px auto;
-            max-width: 600px;
-        }
-        
+        h1 { text-align: center; margin-bottom: 30px; color: #333; }
         .board {
             display: flex;
             gap: 20px;
             overflow-x: auto;
             padding-bottom: 20px;
         }
-        
         .column {
             background: #ebecf0;
             border-radius: 12px;
-            width: 300px;
-            min-width: 300px;
+            width: 320px;
+            min-width: 320px;
             padding: 15px;
             display: flex;
             flex-direction: column;
-            max-height: calc(100vh - 180px);
+            max-height: calc(100vh - 150px);
         }
-        
         .column-header {
             display: flex;
             justify-content: space-between;
@@ -73,13 +37,7 @@
             padding-bottom: 10px;
             border-bottom: 2px solid #ddd;
         }
-        
-        .column-title {
-            font-weight: 600;
-            font-size: 16px;
-            color: #333;
-        }
-        
+        .column-title { font-weight: 600; font-size: 16px; color: #333; }
         .column-count {
             background: #fff;
             padding: 2px 8px;
@@ -87,7 +45,6 @@
             font-size: 12px;
             color: #666;
         }
-        
         .tasks {
             flex: 1;
             overflow-y: auto;
@@ -95,179 +52,422 @@
             flex-direction: column;
             gap: 10px;
         }
-        
         .task {
             background: #fff;
             padding: 12px;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            cursor: pointer;
+            cursor: grab;
             transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
         }
-        
         .task:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
-        
+        .task.dragging { opacity: 0.5; cursor: grabbing; }
         .task-title {
             font-size: 14px;
             color: #333;
             margin-bottom: 8px;
             line-height: 1.4;
+            padding-right: 20px;
         }
-        
-        .task-meta {
+        .task-deadline {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px;
         }
-        
+        .task-deadline.overdue { color: #c62828; font-weight: 600; }
+        .task-deadline.today { color: #f57c00; font-weight: 600; }
+        .task-deadline.soon { color: #1976d2; }
+        .task-meta { display: flex; gap: 8px; flex-wrap: wrap; }
         .tag {
             font-size: 11px;
             padding: 2px 6px;
             border-radius: 4px;
             font-weight: 500;
         }
-        
-        .tag-open { background: #e8f5e9; color: #2e7d32; }
-        .tag-closed { background: #e0e0e0; color: #616161; }
-        
-        .task-number {
-            font-size: 12px;
-            color: #1976d2;
-            margin-bottom: 4px;
+        .tag-high { background: #ffebee; color: #c62828; }
+        .tag-medium { background: #fff3e0; color: #ef6c00; }
+        .tag-low { background: #e8f5e9; color: #2e7d32; }
+        .tag-automation { background: #e1f5fe; color: #0277bd; }
+        .tag-research { background: #f3e5f5; color: #7b1fa2; }
+        .tag-integration { background: #e0f2f1; color: #00695c; }
+        .tag-content { background: #fff8e1; color: #f57f17; }
+        .add-task {
+            margin-top: 10px;
+            padding: 10px;
+            background: transparent;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
         }
-        
-        /* Цвета колонок */
-        .column-ideas { border-top: 4px solid #7c4dff; }
+        .add-task:hover { border-color: #999; color: #333; }
+        .column.drag-over { background: #d4edda; }
+        .modal {
+            display: none;
+position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-title { font-size: 18px; margin-bottom: 15px; color: #333; }
+        .modal input, .modal select, .modal textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .modal textarea { min-height: 80px; resize: vertical; }
+        .modal label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+            margin-top: 8px;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.8; }
+        .btn-primary { background: #1976d2; color: #fff; }
+        .btn-secondary { background: #e0e0e0; color: #333; }
+        .btn-danger { background: #c62828; color: #fff; }
+        .delete-btn {
+            position: absolute;
+            top: 8px; right: 8px;
+            color: #999;
+            cursor: pointer;
+            font-size: 18px;
+            width: 20px; height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        .delete-btn:hover { color: #c62828; background: #ffebee; }
+        .edit-btn {
+            position: absolute;
+            top: 8px; right: 32px;
+            color: #999;
+            cursor: pointer;
+            font-size: 14px;
+            width: 20px; height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        .edit-btn:hover { color: #1976d2; background: #e3f2fd; }
         .column-todo { border-top: 4px solid #9e9e9e; }
         .column-progress { border-top: 4px solid #1976d2; }
         .column-review { border-top: 4px solid #f57c00; }
         .column-done { border-top: 4px solid #388e3c; }
+        .column-ideas { border-top: 4px solid #7c4dff; }
     </style>
 </head>
 <body>
     <h1>📋 Канбан: Ксения & Клау</h1>
-    <p class="subtitle">Все задачи из GitHub Issues • Без localStorage</p>
-    
-    <div id="loading" class="loading">Загрузка задач из GitHub...</div>
-    <div id="error" class="error" style="display: none;"></div>
-    
-    <div class="board" id="board" style="display: none;">
+    <div class="board">
         <div class="column column-ideas" data-column="ideas">
             <div class="column-header">
                 <span class="column-title">💡 Идеи</span>
                 <span class="column-count">0</span>
             </div>
             <div class="tasks"></div>
+            <button class="add-task" onclick="openModal('ideas')">+ Добавить задачу</button>
         </div>
-        
         <div class="column column-todo" data-column="todo">
             <div class="column-header">
                 <span class="column-title">📋 В плане</span>
                 <span class="column-count">0</span>
             </div>
             <div class="tasks"></div>
+            <button class="add-task" onclick="openModal('todo')">+ Добавить задачу</button>
         </div>
-        
         <div class="column column-progress" data-column="progress">
             <div class="column-header">
                 <span class="column-title">🔧 Клау делает</span>
                 <span class="column-count">0</span>
             </div>
             <div class="tasks"></div>
-        </div>
-        
+            <button class="add-task" onclick="openModal('progress')">+ Добавить задачу</button>
+</div>
         <div class="column column-review" data-column="review">
             <div class="column-header">
                 <span class="column-title">👀 На проверке</span>
                 <span class="column-count">0</span>
             </div>
             <div class="tasks"></div>
+            <button class="add-task" onclick="openModal('review')">+ Добавить задачу</button>
         </div>
-        
         <div class="column column-done" data-column="done">
             <div class="column-header">
                 <span class="column-title">✅ Готово</span>
                 <span class="column-count">0</span>
             </div>
             <div class="tasks"></div>
+            <button class="add-task" onclick="openModal('done')">+ Добавить задачу</button>
         </div>
     </div>
-
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h3 class="modal-title" id="modalTitle">Новая задача</h3>
+            <input type="hidden" id="taskId">
+            <input type="text" id="taskTitle" placeholder="Название задачи">
+            <label>Срок выполнения (дедлайн)</label>
+            <input type="date" id="taskDeadline">
+            <label>Приоритет</label>
+            <select id="taskPriority">
+                <option value="high">🔴 Высокий</option>
+                <option value="medium" selected>🟡 Средний</option>
+                <option value="low">🟢 Низкий</option>
+            </select>
+            <label>Тип задачи</label>
+            <select id="taskType">
+                <option value="automation">🤖 Автоматизация</option>
+                <option value="research">🔍 Исследование</option>
+                <option value="integration">🔌 Интеграция</option>
+                <option value="content">📝 Контент</option>
+                <option value="task" selected>📋 Другое</option>
+            </select>
+            <label>Описание</label>
+            <textarea id="taskDesc" placeholder="Описание задачи (необязательно)"></textarea>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+                <button class="btn btn-danger" id="deleteBtn" onclick="deleteCurrentTask()" style="display:none">Удалить</button>
+                <button class="btn btn-primary" onclick="saveTask()">Сохранить</button>
+            </div>
+        </div>
+    </div>
     <script>
-        const REPO_OWNER = 'aYaKseniya';
-        const REPO_NAME = 'kanban-board';
+        let currentColumn = 'todo';
+        let draggedTask = null;
+        let editingTaskId = null;
         
-        async function loadTasksFromGitHub() {
-            try {
-                // Загружаем ВСЕ issues (без фильтра по лейблу)
-                const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues?state=all&per_page=100`);
-                
-                if (!response.ok) {
-                    throw new Error(`GitHub API error: ${response.status}`);
-                }
-                
-                const issues = await response.json();
-                
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('board').style.display = 'flex';
-                
-                // Сортируем: сначала новые
-                issues.sort((a, b) => b.number - a.number);
-                
-                issues.forEach(issue => {
-                    const task = {
-                        id: issue.number,
-                        title: issue.title,
-                        state: issue.state,
-                        url: issue.html_url,
-                        created: issue.created_at
-                    };
-                    
-                    // Открытые → Идеи, Закрытые → Готово
-                    let column = 'ideas';
-                    if (issue.state === 'closed') {
-                        column = 'done';
-                    }
-                    
-                    createTaskElement(task, column);
-                });
-                
+        function loadTasks() {
+            const saved = localStorage.getItem('kanban-tasks');
+            if (saved) {
+                const tasks = JSON.parse(saved);
+                tasks.forEach(task => createTaskElement(task));
                 updateCounts();
-                
-            } catch (error) {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').textContent = 
-                    `Ошибка загрузки: ${error.message}`;
             }
         }
         
-        function createTaskElement(task, column) {
+        function saveTasks() {
+            const tasks = [];
+            document.querySelectorAll('.task').forEach(taskEl => {
+                tasks.push({
+                    id: taskEl.dataset.id,
+                    title: taskEl.querySelector('.task-title').textContent,
+                    deadline: taskEl.dataset.deadline || '',
+                    priority: taskEl.dataset.priority,
+                    type: taskEl.dataset.type,
+                    desc: taskEl.dataset.desc || '',
+                    column: taskEl.closest('.column').dataset.column
+                });
+            });
+            localStorage.setItem('kanban-tasks', JSON.stringify(tasks));
+        }
+        
+        function openModal(column, taskId = null) {
+            currentColumn = column;
+            editingTaskId = taskId;
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const deleteBtn = document.getElementById('deleteBtn');
+            
+            if (taskId) {
+                const taskEl = document.querySelector(`[data-id="${taskId}"]`);
+                modalTitle.textContent = 'Редактировать задачу';
+                document.getElementById('taskId').value = taskId;
+                document.getElementById('taskTitle').value = taskEl.querySelector('.task-title').textContent;
+                document.getElementById('taskDeadline').value = taskEl.dataset.deadline || '';
+                document.getElementById('taskPriority').value = taskEl.dataset.priority;
+                document.getElementById('taskType').value = taskEl.dataset.type;
+                document.getElementById('taskDesc').value = taskEl.dataset.desc || '';
+                deleteBtn.style.display = 'inline-block';
+            } else {
+                modalTitle.textContent = 'Новая задача';
+                document.getElementById('taskId').value = '';
+                document.getElementById('taskTitle').value = '';
+                document.getElementById('taskDeadline').value = '';
+                document.getElementById('taskPriority').value = 'medium';
+                document.getElementById('taskType').value = 'task';
+                document.getElementById('taskDesc').value = '';
+                deleteBtn.style.display = 'none';
+            }
+            modal.classList.add('active');
+            document.getElementById('taskTitle').focus();
+        }
+        
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            editingTaskId = null;
+        }
+        
+        function saveTask() {
+            const title = document.getElementById('taskTitle').value.trim();
+            if (!title) { alert('Введите название задачи'); return; }
+            
+            const taskData = {
+                id: editingTaskId || 'task-' + Date.now(),
+                title: title,
+                deadline: document.getElementById('taskDeadline').value,
+                priority: document.getElementById('taskPriority').value,
+                type: document.getElementById('taskType').value,
+                desc: document.getElementById('taskDesc').value.trim(),
+                column: currentColumn
+            };
+            
+            if (editingTaskId) {
+                const oldEl = document.querySelector(`[data-id="${editingTaskId}"]`);
+                oldEl.remove();
+            }
+            createTaskElement(taskData);
+            saveTasks();
+            updateCounts();
+            closeModal();
+}
+        
+        function deleteCurrentTask() {
+            if (editingTaskId && confirm('Удалить задачу?')) {
+                const taskEl = document.querySelector(`[data-id="${editingTaskId}"]`);
+                if (taskEl) { taskEl.remove(); saveTasks(); updateCounts(); }
+                closeModal();
+            }
+        }
+        
+        function deleteTask(btn) {
+            if (confirm('Удалить задачу?')) {
+                btn.closest('.task').remove();
+                saveTasks();
+                updateCounts();
+            }
+        }
+        function createTaskElement(task) {
             const taskEl = document.createElement('div');
             taskEl.className = 'task';
+            taskEl.draggable = true;
+            taskEl.dataset.id = task.id;
+            taskEl.dataset.deadline = task.deadline || '';
+            taskEl.dataset.priority = task.priority;
+            taskEl.dataset.type = task.type;
+            taskEl.dataset.desc = task.desc || '';
             
-            const stateClass = task.state === 'closed' ? 'tag-closed' : 'tag-open';
-            const stateLabel = task.state === 'closed' ? '✅ Закрыто' : '📋 Открыто';
+            const priorityClass = 'tag-' + task.priority;
+            const typeClasses = {
+                'automation': 'tag-automation',
+                'research': 'tag-research', 
+                'integration': 'tag-integration',
+                'content': 'tag-content'
+            };
+            const typeLabels = {
+                'automation': '🤖 Автоматизация',
+                'research': '🔍 Исследование',
+                'integration': '🔌 Интеграция', 
+                'content': '📝 Контент'
+            };
+            const typeClass = typeClasses[task.type] || '';
+            const typeLabel = typeLabels[task.type] || '';
+            
+            let deadlineHtml = '';
+            if (task.deadline) {
+                const deadlineClass = getDeadlineClass(task.deadline);
+                const deadlineText = formatDeadline(task.deadline);
+                deadlineHtml = `<div class="task-deadline ${deadlineClass}">📅 ${deadlineText}</div>`;
+            }
             
             taskEl.innerHTML = `
-                <div class="task-number">#${task.id}</div>
+                <span class="edit-btn" onclick="event.stopPropagation(); openModal('${task.column}', '${task.id}')">✎</span>
+                <span class="delete-btn" onclick="event.stopPropagation(); deleteTask(this)">×</span>
                 <div class="task-title">${escapeHtml(task.title)}</div>
+                ${deadlineHtml}
                 <div class="task-meta">
-                    <span class="tag ${stateClass}">${stateLabel}</span>
+                    <span class="tag ${priorityClass}">${getPriorityLabel(task.priority)}</span>
+                    ${typeLabel ? `<span class="tag ${typeClass}">${typeLabel}</span>` : ''}
                 </div>
             `;
             
-            taskEl.addEventListener('click', () => {
-                window.open(task.url, '_blank');
+            taskEl.addEventListener('dragstart', (e) => {
+                draggedTask = taskEl;
+                taskEl.classList.add('dragging');
             });
             
-            const columnEl = document.querySelector(`[data-column="${column}"]`);
-            if (columnEl) {
-                columnEl.querySelector('.tasks').appendChild(taskEl);
+            taskEl.addEventListener('dragend', () => {
+                draggedTask = null;
+                taskEl.classList.remove('dragging');
+                document.querySelectorAll('.column').forEach(col => {
+                    col.classList.remove('drag-over');
+                });
+                saveTasks();
+                updateCounts();
+            });
+            
+            const column = document.querySelector(`[data-column="${task.column}"]`);
+            if (column) {
+                column.querySelector('.tasks').appendChild(taskEl);
             }
+        }
+        
+        function getDeadlineClass(deadline) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const deadlineDate = new Date(deadline);
+            deadlineDate.setHours(0, 0, 0, 0);
+            const diffDays = Math.floor((deadlineDate - today) / (1000 * 60 * 60 * 24));
+            if (diffDays < 0) return 'overdue';
+            if (diffDays === 0) return 'today';
+            if (diffDays <= 3) return 'soon';
+            return '';
+        }
+        
+        function formatDeadline(deadline) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const deadlineDate = new Date(deadline);
+            deadlineDate.setHours(0, 0, 0, 0);
+            const diffDays = Math.floor((deadlineDate - today) / (1000 * 60 * 60 * 24));
+            const options = { day: 'numeric', month: 'short' };
+            const dateStr = deadlineDate.toLocaleDateString('ru-RU', options);
+            if (diffDays < 0) return `Просрочено: ${dateStr}`;
+            if (diffDays === 0) return `Сегодня: ${dateStr}`;
+if (diffDays === 1) return `Завтра: ${dateStr}`;
+            if (diffDays <= 3) return `Через ${diffDays} дн: ${dateStr}`;
+            return dateStr;
         }
         
         function updateCounts() {
@@ -277,13 +477,52 @@
             });
         }
         
+        function getPriorityLabel(priority) {
+            const labels = { high: '🔴 Высокий', medium: '🟡 Средний', low: '🟢 Низкий' };
+            return labels[priority] || priority;
+        }
+        
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
         
-        loadTasksFromGitHub();
+        document.querySelectorAll('.column').forEach(column => {
+            column.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                column.classList.add('drag-over');
+            });
+            
+            column.addEventListener('dragleave', () => {
+                column.classList.remove('drag-over');
+            });
+            
+            column.addEventListener('drop', (e) => {
+                e.preventDefault();
+                column.classList.remove('drag-over');
+                if (draggedTask) {
+                    column.querySelector('.tasks').appendChild(draggedTask);
+                    saveTasks();
+                    updateCounts();
+                }
+            });
+        });
+        
+        document.getElementById('taskTitle').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') saveTask();
+        });
+        
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') closeModal();
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+        
+        loadTasks();
     </script>
 </body>
 </html>
+
